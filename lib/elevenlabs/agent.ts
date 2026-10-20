@@ -4,16 +4,15 @@ import { eleven } from './api'
 type AgentSummary = { agent_id: string; name: string }
 type VoiceSummary = { voice_id: string; name: string; category?: string }
 
+const DEFAULT_AGENT_ID = 'agent_9201m4pnx77geef8dmw7rwzh1xjg'
+const DEFAULT_VOICE_ID = 'OA7F3BEn6BYtmW4UHxbz'
+
 export async function resolveAgentId() {
-  if (process.env.ELEVENLABS_AGENT_ID) return process.env.ELEVENLABS_AGENT_ID
-  const result = await eleven('/convai/agents') as { agents?: AgentSummary[] }
-  return result.agents?.find((agent) => agent.name === 'ADHAM VOICE AI')?.agent_id || ''
+  return process.env.ELEVENLABS_AGENT_ID || DEFAULT_AGENT_ID
 }
 
 export async function resolveVoiceId() {
-  if (process.env.ELEVENLABS_VOICE_ID) return process.env.ELEVENLABS_VOICE_ID
-  const result = await eleven('/voices') as { voices?: VoiceSummary[] }
-  return result.voices?.find((voice) => voice.category === 'cloned')?.voice_id || result.voices?.[0]?.voice_id || ''
+  return process.env.ELEVENLABS_VOICE_ID || DEFAULT_VOICE_ID
 }
 
 export async function configureAgent(selectedVoiceId?: string) {
