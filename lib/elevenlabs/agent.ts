@@ -1,4 +1,4 @@
-import { CORE_PERSONALITY, DEFAULT_GREETING } from '@/lib/agent/personality'
+import { DEFAULT_PERSONALITY, DEFAULT_GREETING } from '@/lib/agent/personality'
 import { eleven } from './api'
 
 type AgentSummary = { agent_id: string; name: string }
@@ -30,7 +30,7 @@ export async function configureAgent(selectedVoiceId?: string) {
       first_message: DEFAULT_GREETING,
       language: 'ar',
       prompt: {
-        prompt: CORE_PERSONALITY,
+        prompt: DEFAULT_PERSONALITY,
         llm: model,
       },
     },
