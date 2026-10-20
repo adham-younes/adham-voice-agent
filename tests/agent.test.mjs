@@ -61,3 +61,24 @@ test('preview uses the same voice model and settings as live conversations', asy
   assert.equal(sent.voice_settings.similarity_boost, 0.85)
   assert.doesNotMatch(sent.text, /يا واد عمي/)
 })
+
+test('a legacy Gemini setting is migrated without retaining its thinking budget or changing the voice', async () => {
+  process.env.ELEVENLABS_API_KEY = 'test-key'
+  process.env.ELEVENLABS_LLM_MODEL = 'gemini-2.5-flash'
+  const current = { conversation_config: { agent: { prompt: { prompt: 'owner instructions', llm: 'gemini-2.5-flash', thinking_budget: 0, tool_ids: ['lookup'] } }, tts: { voice_id: 'original-owner-voice' } }, platform_settings: { analysis_llm: 'gemini-2.5-flash', analysis_llm_billed: false, privacy: { record_voice: false } } }
+  let patched
+  globalThis.fetch = async (_url, init) => {
+    if (init.method === 'PATCH') { patched = JSON.parse(init.body); return Response.json({}) }
+    return Response.json(current)
+  }
+  const result = await configureAgent()
+  assert.equal(result.voiceId, 'original-owner-voice')
+  assert.equal(patched.conversation_config.agent.prompt.llm, 'gemini-3.5-flash-lite')
+  assert.equal(patched.conversation_config.agent.prompt.thinking_budget, null)
+  assert.equal(patched.conversation_config.agent.prompt.reasoning_effort, 'minimal')
+  assert.equal(patched.conversation_config.agent.prompt.prompt, 'owner instructions')
+  assert.deepEqual(patched.conversation_config.agent.prompt.tool_ids, ['lookup'])
+  assert.equal(patched.platform_settings.analysis_llm, 'gemini-3.5-flash-lite')
+  assert.equal(patched.platform_settings.analysis_llm_billed, false)
+  assert.deepEqual(patched.platform_settings.privacy, { record_voice: false })
+})

@@ -2,11 +2,12 @@ import { NextResponse } from 'next/server'
 import { eleven } from '@/lib/elevenlabs/api'
 import { getAgent, resolveAgentId, resolveVoiceId } from '@/lib/elevenlabs/agent'
 import { DEFAULT_MODELS } from '@/lib/agent/personality'
+import { resolveConversationModel } from '@/lib/elevenlabs/models'
 
 export async function GET() {
   const status = {
     groq: false, elevenlabs: false, agentId: '', voiceId: '',
-    models: { llm: process.env.ELEVENLABS_LLM_MODEL || 'gemini-2.5-flash', analysis: process.env.GROQ_ANALYSIS_MODEL || DEFAULT_MODELS.analysis, stt: process.env.GROQ_STT_MODEL || DEFAULT_MODELS.stt, tts: '' },
+    models: { llm: resolveConversationModel(process.env.ELEVENLABS_LLM_MODEL), analysis: process.env.GROQ_ANALYSIS_MODEL || DEFAULT_MODELS.analysis, stt: process.env.GROQ_STT_MODEL || DEFAULT_MODELS.stt, tts: '' },
     voices: [] as { voice_id?: string; name?: string; category?: string }[],
     agents: [] as { agent_id?: string; name?: string }[], errors: [] as string[],
   }

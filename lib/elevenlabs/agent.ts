@@ -1,7 +1,9 @@
 import { DEFAULT_PERSONALITY, DEFAULT_GREETING, withSampleStyle } from '@/lib/agent/personality'
 import { eleven } from './api'
+import { DEFAULT_CONVERSATION_MODEL, resolveConversationModel } from './models'
 
 export type AgentConfig = {
+  platform_settings?: { analysis_llm?: string; [key: string]: unknown }
   conversation_config?: {
     agent?: { first_message?: string; language?: string; prompt?: { prompt?: string; [key: string]: unknown }; [key: string]: unknown }
     tts?: { voice_id?: string; [key: string]: unknown }
@@ -35,10 +37,11 @@ export async function getAgent() {
 
 export async function configureAgent(selectedVoiceId?: string, options?: { applySampleStyle?: boolean }) {
   const existingId = await resolveAgentId()
-  const current = existingId ? (await getAgent()).conversation_config || {} : {}
+  const existing = existingId ? await getAgent() : {}
+  const current = existing.conversation_config || {}
   const voiceId = selectedVoiceId || current.tts?.voice_id || await resolveVoiceId()
   if (!voiceId) throw new Error('اختر صوتًا من حساب ElevenLabs أولًا.')
-  const model = process.env.ELEVENLABS_LLM_MODEL || 'gemini-2.5-flash'
+  const model = resolveConversationModel(process.env.ELEVENLABS_LLM_MODEL)
   const conversationConfig = {
     ...current,
     agent: {
@@ -49,7 +52,9 @@ export async function configureAgent(selectedVoiceId?: string, options?: { apply
         ...current.agent?.prompt,
         prompt: options?.applySampleStyle ? withSampleStyle(current.agent?.prompt?.prompt) : current.agent?.prompt?.prompt || DEFAULT_PERSONALITY,
         llm: model,
-        ...(model === 'gemini-2.5-flash' ? { thinking_budget: 0 } : {}),
+        // Flash-Lite uses reasoning effort rather than the old thinking budget.
+        thinking_budget: null,
+        reasoning_effort: model === DEFAULT_CONVERSATION_MODEL ? 'minimal' : null,
         temperature: 0.5,
         max_tokens: 800,
         timezone: 'Africa/Cairo',
@@ -61,7 +66,10 @@ export async function configureAgent(selectedVoiceId?: string, options?: { apply
     turn: { ...current.turn, turn_eagerness: 'eager' },
   }
   if (existingId) {
-    await eleven(`/convai/agents/${existingId}`, { method: 'PATCH', body: JSON.stringify({ conversation_config: conversationConfig }) })
+    const platformSettings = existing.platform_settings?.analysis_llm === 'gemini-2.5-flash'
+      ? { platform_settings: { ...existing.platform_settings, analysis_llm: model } }
+      : {}
+    await eleven(`/convai/agents/${existingId}`, { method: 'PATCH', body: JSON.stringify({ conversation_config: conversationConfig, ...platformSettings }) })
     return { agentId: existingId, voiceId, created: false }
   }
   const created = await eleven('/convai/agents/create', { method: 'POST', body: JSON.stringify({ name: 'ADHAM VOICE AI', conversation_config: conversationConfig }) }) as { agent_id: string }
