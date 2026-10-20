@@ -78,7 +78,7 @@ test('a legacy Gemini setting is migrated without retaining its thinking budget 
   assert.equal(patched.conversation_config.agent.prompt.reasoning_effort, 'minimal')
   assert.equal(patched.conversation_config.agent.prompt.prompt, 'owner instructions')
   assert.deepEqual(patched.conversation_config.agent.prompt.tool_ids, ['lookup'])
-  assert.equal(patched.platform_settings.analysis_llm, 'gemini-3.5-flash-lite')
+  assert.equal(patched.platform_settings.analysis_llm, 'gemini-3.5-flash')
   assert.equal(patched.platform_settings.analysis_llm_billed, false)
   assert.deepEqual(patched.platform_settings.privacy, { record_voice: false })
 })

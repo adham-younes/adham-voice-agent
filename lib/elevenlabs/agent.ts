@@ -1,6 +1,6 @@
 import { DEFAULT_PERSONALITY, DEFAULT_GREETING, withSampleStyle } from '@/lib/agent/personality'
 import { eleven } from './api'
-import { DEFAULT_CONVERSATION_MODEL, resolveConversationModel } from './models'
+import { DEFAULT_ANALYSIS_MODEL, DEFAULT_CONVERSATION_MODEL, resolveConversationModel } from './models'
 
 export type AgentConfig = {
   platform_settings?: { analysis_llm?: string; [key: string]: unknown }
@@ -67,7 +67,7 @@ export async function configureAgent(selectedVoiceId?: string, options?: { apply
   }
   if (existingId) {
     const platformSettings = existing.platform_settings?.analysis_llm === 'gemini-2.5-flash'
-      ? { platform_settings: { ...existing.platform_settings, analysis_llm: model } }
+      ? { platform_settings: { ...existing.platform_settings, analysis_llm: DEFAULT_ANALYSIS_MODEL } }
       : {}
     await eleven(`/convai/agents/${existingId}`, { method: 'PATCH', body: JSON.stringify({ conversation_config: conversationConfig, ...platformSettings }) })
     return { agentId: existingId, voiceId, created: false }

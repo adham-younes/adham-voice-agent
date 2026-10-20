@@ -1,4 +1,5 @@
 export const DEFAULT_CONVERSATION_MODEL = 'gemini-3.5-flash-lite'
+export const DEFAULT_ANALYSIS_MODEL = 'gemini-3.5-flash'
 
 export function resolveConversationModel(value?: string) {
   const model = value?.trim()
