@@ -7,11 +7,16 @@ import { Mic, MicOff, PhoneOff, Send, Waves } from 'lucide-react'
 type Message = { id: string; role: 'user'|'agent'; text: string }
 function VoiceConsoleInner() {
   const [messages,setMessages]=useState<Message[]>([]); const [error,setError]=useState(''); const [text,setText]=useState(''); const [seconds,setSeconds]=useState(0); const [busy,setBusy]=useState(false)
-  const conversation=useConversation({ onMessage: (message: unknown) => { const m=message as {message?:string;source?:string}; if(m.message)setMessages(v=>[...v,{id:crypto.randomUUID(),role:m.source==='user'?'user':'agent',text:m.message!}]) }, onError: (message: unknown)=>setError(typeof message==='string'?message:'انقطع الاتصال الصوتي.') })
+  const conversation=useConversation({
+    onConnect: () => setBusy(false),
+    onDisconnect: () => setBusy(false),
+    onMessage: (message: unknown) => { const m=message as {message?:string;source?:string}; if(m.message)setMessages(v=>[...v,{id:crypto.randomUUID(),role:m.source==='user'?'user':'agent',text:m.message!}]) },
+    onError: (message: unknown) => { setBusy(false); setError(typeof message==='string'?message:'انقطع الاتصال الصوتي.') },
+  })
   const active=conversation.status==='connected'; const bottom=useRef<HTMLDivElement>(null)
   useEffect(()=>{bottom.current?.scrollIntoView({behavior:'smooth'})},[messages])
   useEffect(()=>{if(!active)return; const t=setInterval(()=>setSeconds(v=>v+1),1000); return()=>clearInterval(t)},[active])
-  async function start(){if(busy||active)return;setBusy(true);setError('');try{await navigator.mediaDevices.getUserMedia({audio:true});const r=await fetch('/api/conversation-token');const d=await r.json();if(!r.ok)throw new Error(d.error);conversation.startSession({conversationToken:d.token,connectionType:'webrtc'})}catch(e){setError(e instanceof Error?e.message:'تعذر تشغيل الميكروفون.')}finally{setBusy(false)}}
+  async function start(){if(busy||active)return;setBusy(true);setError('');try{if(!navigator.mediaDevices?.getUserMedia)throw new Error('المتصفح لا يدعم تشغيل الميكروفون.');const r=await fetch('/api/conversation-token');const d=await r.json();if(!r.ok)throw new Error(d.error);conversation.startSession({conversationToken:d.token,connectionType:'websocket'})}catch(e){setBusy(false);setError(e instanceof Error?e.message:'تعذر تشغيل الميكروفون.')}}
   function submit(e:FormEvent){e.preventDefault();if(!text.trim()||!active)return;conversation.sendUserMessage(text.trim());setText('')}
   const bars=Array.from({length:28},(_,i)=>18+((i*17)%44))
   return <div className="mx-auto flex min-h-screen max-w-6xl flex-col px-5 py-7 md:px-10">
