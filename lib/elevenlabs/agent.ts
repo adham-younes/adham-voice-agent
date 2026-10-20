@@ -7,12 +7,18 @@ type VoiceSummary = { voice_id: string; name: string; category?: string }
 const DEFAULT_AGENT_ID = 'agent_9201m4pnx77geef8dmw7rwzh1xjg'
 const DEFAULT_VOICE_ID = 'OA7F3BEn6BYtmW4UHxbz'
 
+function resolveOptionalId(value: string | undefined, fallback: string) {
+  const normalized = value?.trim()
+  if (!normalized || normalized === 'undefined' || normalized === 'null') return fallback
+  return normalized
+}
+
 export async function resolveAgentId() {
-  return process.env.ELEVENLABS_AGENT_ID || DEFAULT_AGENT_ID
+  return resolveOptionalId(process.env.ELEVENLABS_AGENT_ID, DEFAULT_AGENT_ID)
 }
 
 export async function resolveVoiceId() {
-  return process.env.ELEVENLABS_VOICE_ID || DEFAULT_VOICE_ID
+  return resolveOptionalId(process.env.ELEVENLABS_VOICE_ID, DEFAULT_VOICE_ID)
 }
 
 export async function configureAgent(selectedVoiceId?: string) {
