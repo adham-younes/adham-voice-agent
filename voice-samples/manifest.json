@@ -1,0 +1,25 @@
+{
+  "samples": [
+    {
+      "id": "1",
+      "file": "sample-1.flac",
+      "source": "WhatsApp Audio 2026-09-10 at 18.06.21.opus",
+      "durationSeconds": 69.03,
+      "sha256": "8a05a1bdf17c0aa34b12a4e4497c53034547531b2dc1bea04221e7640bf040ba"
+    },
+    {
+      "id": "2",
+      "file": "sample-2.flac",
+      "source": "WhatsApp Audio 2026-09-29 at 22.25.21.opus",
+      "durationSeconds": 26.75,
+      "sha256": "6447afb224b41ad67458c36ab966573065f0e78f6c74eee2d33d43e5ecfe1dd4"
+    },
+    {
+      "id": "3",
+      "file": "sample-3.flac",
+      "source": "WhatsApp Audio 2026-09-29 at 22.52.05.opus",
+      "durationSeconds": 46.07,
+      "sha256": "115e6e80637423ffef66f8174384030c0e331effb4c0e2b2eb3799799d6b266c"
+    }
+  ]
+}
