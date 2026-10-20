@@ -1,10 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import { CORE_PERSONALITY } from '@/lib/agent/personality'
+import { DEFAULT_PERSONALITY } from '@/lib/agent/personality'
 const chips=['مباشر','ذكي','عملي','عفوي','ساخر بخفة','حساس وقت اللزوم']
 export default function Personality(){
-  const [prompt,setPrompt]=useState(CORE_PERSONALITY)
+  const [prompt,setPrompt]=useState(DEFAULT_PERSONALITY)
   const [saving,setSaving]=useState(false)
   const [message,setMessage]=useState('')
   async function save(){setSaving(true);setMessage('');const response=await fetch('/api/agent/personality',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt})});const result=await response.json();setMessage(response.ok?'تم حفظ الشخصية داخل الوكيل الحقيقي.':result.error);setSaving(false)}
